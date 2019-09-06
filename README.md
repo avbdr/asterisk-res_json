@@ -262,5 +262,6 @@ intended to be used with asterisk, so you will have to follow their usage and di
 and i guess so do i. i'm no lawyer and i have to take the safe route, and this is why i go with the 
 same level of license restriction as asterisk does. 
 -----------------------------
+Jinhill cb@ecd.io 2019
 bugfix for asterisk 16
 update cJSON
