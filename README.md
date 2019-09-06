@@ -261,3 +261,6 @@ minor and insignificant changes, to make my picky compiler happy. the __res_json
 intended to be used with asterisk, so you will have to follow their usage and distribution policy. 
 and i guess so do i. i'm no lawyer and i have to take the safe route, and this is why i go with the 
 same level of license restriction as asterisk does. 
+-----------------------------
+bugfix for asterisk 16
+update cJSON
