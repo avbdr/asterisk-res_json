@@ -48,19 +48,12 @@ __res_json__ module (git must be installed on your machine):
 shell script was provided for that, so run `./asterisk-res_json/install.sh`. After it runs, you need 
 to manually edit `addons/Makefile` (sorry about that, but i really don't have a better solution):
 - add `res_json` to the `ALL_C_MODS` macro 
-- explicitely tell the linker to add the res_json symbols by adding a line like 
 
-`res_json.so: cJSON.o res_json.o`
-
-(4) edit the file `main/asterisk.exports.in` and add the following line next to the similar ones:
-
-`LINKER_SYMBOL_PREFIXcJSON_*;`
-
-(5) only now proceed with building asterisk (`./configure; make menuconfig; make; make install`). 
+(4) only now proceed with building asterisk (`./configure; make menuconfig; make; make install`). 
 if you already built asterisk from source in this directory, you may need to run `./bootstrap.sh` 
 before running `./configure`.
 
-(6) start asterisk, login to its console, and try `core show function JSONELEMENT`. you should get 
+(5) start asterisk, login to its console, and try `core show function JSONELEMENT`. you should get 
 an usage description.
 
 what'd you get
@@ -256,12 +249,9 @@ Copyright (c) 2010 Radu Maierean
 the __res_json__ module is distributed under the GNU General Public License version 2. The GPL 
 (version 2) is included in this source tree in the file COPYING.
 
-the __res_json__ module is built on top of David Gamble's cJSON library. i used his code with very 
-minor and insignificant changes, to make my picky compiler happy. the __res_json module__ is 
-intended to be used with asterisk, so you will have to follow their usage and distribution policy. 
-and i guess so do i. i'm no lawyer and i have to take the safe route, and this is why i go with the 
-same level of license restriction as asterisk does. 
------------------------------
-Jinhill cb@ecd.io 2019
-bugfix for asterisk 16
-update cJSON
+Copyright (c) 2019 Jinhill <cb@ecd.io>
+Bugfix for asterisk 16
+Update cJSON
+
+Copyright (c) 2021 Yauheni Kaliuta <yauheni.kaliuta@redhat.com>
+cJSON -> jansson migration
