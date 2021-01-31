@@ -1,9 +1,9 @@
 /*
  * Asterisk -- An open source telephony toolkit.
  *
- * Copyright (C) 2010, Radu M
- *
- * Radu Maierean <radu dot maierean at g-mail>
+ * Copyright (C) 2010, Radu M <radu dot maierean at g-mail>
+ * Copyright (c) 2019 Jinhill <cb@ecd.io>
+ * Copyright (c) 2021 Yauheni Kaliuta <yauheni.kaliuta@redhat.com>
  *
  * See http://www.asterisk.org for more information about
  * the Asterisk project. Please do not directly contact
@@ -11,7 +11,7 @@
  * the project provides a web site, mailing lists and IRC
  * channels for your use.
  *
- * This program is ast_free software, distributed under the terms of
+ * This program is free software, distributed under the terms of
  * the GNU General Public License Version 2. See the LICENSE file
  * at the top of the source tree.
  *
