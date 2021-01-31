@@ -42,7 +42,7 @@ but dont proceed to building it yet.
 
 (2) cd into the directory where you unzipped / untarred asterisk (the "asterisk root"), and get the 
 __res_json__ module (git must be installed on your machine): 
-`git clone git://github.com/drivefast/asterisk-res_json.git`
+`git clone git://github.com/avbdr/asterisk-res_json.git`
 
 (3) we now need to move the source files to their appropriate places in the asterisk directory. a 
 shell script was provided for that, so run `./asterisk-res_json/install.sh`. After it runs, you need 
