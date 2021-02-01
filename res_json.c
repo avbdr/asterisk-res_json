@@ -362,55 +362,76 @@ static int jsonget_exec(struct ast_channel *chan,
 		json_set_operation_result(chan, ASTJSON_PARSE_ERROR);
 		return 0;
 	}
-	// go over the path (and eliminate heading and trailing slash in the process)
-	char *thispath = ast_strdupa((char *)(args.path + ((args.path[0] == '/') ? 1 : 0)));
-	if (thispath[strlen(thispath) - 1] == '/') thispath[strlen(thispath) - 1] = 0;
-	struct ast_json *thisobject = doc, *nextobject = NULL;
-	int ixarray;
-	char *pathpiece = strsep(&thispath, "/");
-	while (pathpiece) {
-		// determine if we have an object with the given name or index
-		if (sscanf(pathpiece, "%3d", &ixarray) == 1)
-			nextobject = ast_json_array_get(thisobject, ixarray);
-		else
-			nextobject = ast_json_object_get(thisobject, pathpiece);
-		if (!nextobject) {
-			ast_json_unref(doc);
-			json_set_operation_result(chan, ASTJSON_NOTFOUND);
-			return 0;
-		}
-		thisobject = nextobject;
-		pathpiece = strsep(&thispath, "/");
-	}
-	// got to the end of our path, evaluate the object type and set the value
-	char *type = NULL; char *value = NULL;
-	enum ast_json_type jtype = ast_json_typeof(thisobject);
-	switch (jtype) {
-		case AST_JSON_FALSE: type = ast_strdupa("bool"); ast_copy_string(buffer, "0", buflen); break;
-		case AST_JSON_TRUE: type = ast_strdupa("bool"); ast_copy_string(buffer, "1", buflen); break;
-		case AST_JSON_NULL: type = ast_strdupa("null"); ast_copy_string(buffer, "", buflen); break;
-		case AST_JSON_REAL:
-		case AST_JSON_INTEGER:
-			type = ast_strdupa("number"); 
-			if (jtype == AST_JSON_REAL)
-				ast_asprintf(&value, "%f", ast_json_real_get(thisobject));
+
+	int first = 1;
+	char *path = "", *type = NULL;
+	while ((path = strsep(&args.path, ","))) {
+		// go over the path (and eliminate heading and trailing slash in the process)
+		char *thispath = ast_strdupa((char *)(path + ((path[0] == '/') ? 1 : 0)));
+		if (thispath[strlen(thispath) - 1] == '/') thispath[strlen(thispath) - 1] = 0;
+
+		struct ast_json *thisobject = doc, *nextobject = NULL;
+		int ixarray;
+		char *pathpiece = strsep(&thispath, "/");
+		while (pathpiece) {
+			// determine if we have an object with the given name or index
+			if (sscanf(pathpiece, "%3d", &ixarray) == 1)
+				nextobject = ast_json_array_get(thisobject, ixarray);
 			else
-				ast_asprintf(&value, "%d", (int)ast_json_integer_get(thisobject));
-			ast_copy_string(buffer, value, buflen); 
-			ast_free(value);
-			break;
-		case AST_JSON_STRING:
-			type = ast_strdupa("string"); 
-			ast_copy_string(buffer, ast_json_string_get(thisobject), buflen);
-			break;
-		case AST_JSON_ARRAY:
-			type = ast_strdupa("array"); 
-			ast_copy_string(buffer, ast_json_dump_string_format(thisobject, 0), buflen);
-			break;
-		case AST_JSON_OBJECT:
-			type = ast_strdupa("node"); 
-			ast_copy_string(buffer, ast_json_dump_string_format(thisobject, 0), buflen);
-			break;
+				nextobject = ast_json_object_get(thisobject, pathpiece);
+			if (!nextobject) {
+				ast_json_unref(doc);
+				json_set_operation_result(chan, ASTJSON_NOTFOUND);
+				return 0;
+			}
+			thisobject = nextobject;
+			pathpiece = strsep(&thispath, "/");
+		}
+		ast_free(thispath);
+
+		if (!first)
+			ast_build_string(&buffer, &buflen, ",");
+
+		// got to the end of our path, evaluate the object type and set the value
+		char *value = NULL;
+		enum ast_json_type jtype = ast_json_typeof(thisobject);
+		switch (jtype) {
+			case AST_JSON_FALSE:
+				type = ast_strdupa("bool");
+				ast_build_string(&buffer, &buflen, "0");
+				break;
+			case AST_JSON_TRUE:
+				type = ast_strdupa("bool");
+				ast_build_string(&buffer, &buflen, "1");
+				break;
+			case AST_JSON_NULL:
+				type = ast_strdupa("null");
+				ast_build_string(&buffer, &buflen, "");
+				break;
+			case AST_JSON_REAL:
+			case AST_JSON_INTEGER:
+				type = ast_strdupa("number");
+				if (jtype == AST_JSON_REAL)
+					ast_asprintf(&value, "%f", ast_json_real_get(thisobject));
+				else
+					ast_asprintf(&value, "%d", (int)ast_json_integer_get(thisobject));
+				ast_build_string(&buffer, &buflen, value);
+				ast_free(value);
+				break;
+			case AST_JSON_STRING:
+				type = ast_strdupa("string");
+				ast_build_string(&buffer, &buflen, ast_json_string_get(thisobject));
+				break;
+			case AST_JSON_ARRAY:
+				type = ast_strdupa("array");
+				ast_build_string(&buffer, &buflen, ast_json_dump_string_format(thisobject, 0));
+				break;
+			case AST_JSON_OBJECT:
+				type = ast_strdupa("node");
+				ast_build_string(&buffer, &buflen, ast_json_dump_string_format(thisobject, 0));
+				break;
+		}
+		first = 0;
 	}
 	pbx_builtin_setvar_helper(chan, "JSONTYPE", type);
 	json_set_operation_result(chan, ASTJSON_OK);
@@ -652,6 +673,7 @@ static int jsonadd_exec(struct ast_channel *chan, const char *data) {
 			} else
 				thisobject = nextobject;
 		}
+		ast_free(thispath);
 	}
 	// regenerate the source json
 	char *jsonresult = ast_json_dump_string_format(doc, 0);
