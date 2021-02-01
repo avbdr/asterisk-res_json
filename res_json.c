@@ -23,7 +23,7 @@
  *
  * \brief JSONPRETTY() formats a json document for easy read
  * \brief JSONCOMPRESS() formats a json document for minimal footprint
- * \brief JSONELEMENT() get element at path from a json document
+ * \brief JSONGET() get element at path from a json document
  * \brief jsonvariables sets a list of variables from a single-level json document
  * \brief jsonadd add an element at path in a json document
  * \brief jsonset set value of an element at path in a json document
@@ -77,7 +77,7 @@
 			characters). cosmetic functionality only.</para>
 		</description>
 	</function>
-	<function name="JSONELEMENT" language="en_US">
+	<function name="JSONGET" language="en_US">
 		<synopsis>
 			gets the value of an element at a given path in a json document
 		</synopsis>	
@@ -95,7 +95,7 @@
 			in the dialplan variable JSONTYPE.</para>
 		</description>
 	</function>
-	<application name="jsonvariables" language="en_US">
+	<application name="JsonVariables" language="en_US">
 		<synopsis>
 			parse a single-level json structure (key-value pairs) as dialplan variables
 		</synopsis>
@@ -118,10 +118,10 @@
 			separators and braces...</para>
 		</description>
 		<see-also>
-			<ref type="application">jsonelement</ref>
+			<ref type="application">jsonget</ref>
 		</see-also>
 	</application>
-	<application name="jsonadd" language="en_US">
+	<application name="JsonAdd" language="en_US">
 		<synopsis>
 			adds a new element in a json document
 		</synopsis>
@@ -156,11 +156,11 @@
 			updated to reflect the element added.</para>
 		</description>
 		<see-also>
-			<ref type="application">jsonset</ref>
-			<ref type="application">jsondelete</ref>
+			<ref type="application">JsonSet</ref>
+			<ref type="application">JsonDelete</ref>
 		</see-also>
 	</application>
-	<application name="jsonset" language="en_US">
+	<application name="JsonSet" language="en_US">
 		<synopsis>
 			changes the value of an element in a json document
 		</synopsis>
@@ -193,11 +193,11 @@
 			the change.</para>
 		</description>
 		<see-also>
-			<ref type="application">jsonadd</ref>
-			<ref type="application">jsondelete</ref>
+			<ref type="application">JsonAdd</ref>
+			<ref type="application">JsonDelete</ref>
 		</see-also>
 	</application>
-	<application name="jsondelete" language="en_US">
+	<application name="JsonDelete" language="en_US">
 		<synopsis>
 			removes an element from a json document
 		</synopsis>
@@ -219,16 +219,16 @@
 			reflect the change.</para>
 		</description>
 		<see-also>
-			<ref type="application">jsonadd</ref>
-			<ref type="application">jsonset</ref>
+			<ref type="application">JsonAdd</ref>
+			<ref type="application">JsonSet</ref>
 		</see-also>
 	</application>
  ***/
 
-static const char *app_jsonvariables = "jsonvariables";
-static const char *app_jsonadd = "jsonadd";
-static const char *app_jsonset = "jsonset";
-static const char *app_jsondelete = "jsondelete";
+static const char *app_jsonvariables = "JsonVariables";
+static const char *app_jsonadd = "JsonAdd";
+static const char *app_jsonset = "JsonSet";
+static const char *app_jsondelete = "JsonDelete";
 
 #define MAX_ASTERISK_VARLEN    4096
 
@@ -324,7 +324,7 @@ static int jsoncompress_exec(struct ast_channel *chan,
 
 }
 
-static int jsonelement_exec(struct ast_channel *chan, 
+static int jsonget_exec(struct ast_channel *chan, 
 	const char *cmd, char *parse, char *buffer, size_t buflen
 ) {
 // searches for a json element found based on a path (like "/path/to/element/3/value")  
@@ -339,7 +339,7 @@ static int jsonelement_exec(struct ast_channel *chan,
 		AST_APP_ARG(path);
 	);
 	if (ast_strlen_zero(parse)) {
-		ast_log(LOG_WARNING, "jsonelement requires arguments (json,path)\n");
+		ast_log(LOG_WARNING, "jsonget requires arguments (json,path)\n");
 		json_set_operation_result(chan, ASTJSON_ARG_NEEDED);
 		return 0;
 	}
@@ -900,16 +900,16 @@ static struct ast_custom_function acf_jsoncompress = {
 	.name = "JSONCOMPRESS",
 	.read = jsoncompress_exec
 };
-static struct ast_custom_function acf_jsonelement = {
-	.name = "JSONELEMENT",
-	.read = jsonelement_exec
+static struct ast_custom_function acf_jsonget = {
+	.name = "JSONGET",
+	.read = jsonget_exec
 };
 
 static int load_module(void) {
 	int ret = 0;
 	ret |= ast_custom_function_register(&acf_jsonpretty);
 	ret |= ast_custom_function_register(&acf_jsoncompress);
-	ret |= ast_custom_function_register(&acf_jsonelement);
+	ret |= ast_custom_function_register(&acf_jsonget);
 	ret |= ast_register_application_xml(app_jsonvariables, jsonvariables_exec);
 	ret |= ast_register_application_xml(app_jsonadd, jsonadd_exec);
 	ret |= ast_register_application_xml(app_jsonset, jsonset_exec);
@@ -921,7 +921,7 @@ static int unload_module(void) {
 	int ret = 0;
 	ret |= ast_custom_function_unregister(&acf_jsonpretty);
 	ret |= ast_custom_function_unregister(&acf_jsoncompress);
-	ret |= ast_custom_function_unregister(&acf_jsonelement);
+	ret |= ast_custom_function_unregister(&acf_jsonget);
 	ret |= ast_unregister_application(app_jsonvariables);
 	ret |= ast_unregister_application(app_jsonadd);
 	ret |= ast_unregister_application(app_jsonset);
